@@ -178,12 +178,11 @@ public class UniversalCable extends BufferedTransmitter<EnergyHandler, EnergyNet
         if (hasTransmitterNetwork()) {
             EnergyNetwork transmitterNetwork = getTransmitterNetworkNN();
             if (!transmitterNetwork.energyContainer.isEmpty() && saveShareJournal.saveShare > 0) {
-                //TODO: I believe I fixed the save share distribution bug that caused this to be necessary. If this comes back up look into it again
-                // or reinstate the clamping
-                //Clamp the value so that we can't error if the network's energy is less than the amount we are saving
-                //saveShareJournal.saveShare = Math.min(transmitterNetwork.energyContainer.getAmountAsLong(), saveShareJournal.saveShare);
-                transmitterNetwork.energyContainer.setEnergy(transmitterNetwork.energyContainer.getAmountAsLong() - saveShareJournal.saveShare, transaction);
-                buffer.setEnergy(saveShareJournal.saveShare, transaction);
+                //Save shares can be stale if the network's energy dropped after they were calculated, so clamp to what the network actually has
+                long networkEnergy = transmitterNetwork.energyContainer.getAmountAsLong();
+                long share = Math.min(networkEnergy, saveShareJournal.saveShare);
+                transmitterNetwork.energyContainer.setEnergy(networkEnergy - share, transaction);
+                buffer.setEnergy(share, transaction);
             }
         }
     }

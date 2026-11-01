@@ -85,6 +85,8 @@ public class FusionReactorMultiblockData extends MultiblockData {
     private static final double BURN_RATIO = 1;
     //Thermal characteristics
     private static final long PLASMA_HEAT_CAPACITY = 100;
+    //Laser energy is 1000x stronger than the original balance, as Laser Amplifiers store 1000x less energy
+    private static final double LASER_HEAT_MULTIPLIER = 1_000;
     private static final double CASE_HEAT_CAPACITY = 1;
     private static final double INVERSE_INSULATION = 100_000;
     //Heat transfer metrics
@@ -219,11 +221,8 @@ public class FusionReactorMultiblockData extends MultiblockData {
     public void addTemperatureFromEnergyInput(long energyAdded, TransactionContext transaction) {
         if (energyAdded > 0) {
             plasmaJournal.updateSnapshots(transaction);
-            if (isBurning()) {
-                plasmaJournal.temperature += (double) energyAdded / PLASMA_HEAT_CAPACITY;
-            } else {
-                plasmaJournal.temperature += ((double) energyAdded / PLASMA_HEAT_CAPACITY) * 10;
-            }
+            double heat = LASER_HEAT_MULTIPLIER * energyAdded / PLASMA_HEAT_CAPACITY;
+            plasmaJournal.temperature += isBurning() ? heat : heat * 10;
         }
     }
 

@@ -1,6 +1,7 @@
 package mekanism.generators.common.tile.fusion;
 
 import mekanism.api.lasers.ILaserReceptor;
+import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.transaction.TransactionHelper;
 import mekanism.generators.common.content.fusion.FusionReactorMultiblockData;
 import mekanism.generators.common.registries.GeneratorsBlocks;
@@ -34,7 +35,8 @@ public class TileEntityLaserFocusMatrix extends TileEntityFusionReactorBlock imp
             FusionReactorMultiblockData multiblock = getMultiblock();
             if (multiblock.isFormed()) {
                 try (Transaction transaction = TransactionHelper.openTransactionSafe()) {
-                    multiblock.setPlasmaTemp(10 * FusionReactorMultiblockData.BURN_TEMPERATURE, transaction);
+                    //Acts like one full Laser Amplifier shot
+                    multiblock.addTemperatureFromEnergyInput(MekanismConfig.storage.laserAmplifier.get(), transaction);
                     transaction.commit();
                 }
                 return InteractionResult.SUCCESS_SERVER;
